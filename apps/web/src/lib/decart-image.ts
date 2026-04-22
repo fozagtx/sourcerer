@@ -5,9 +5,10 @@ import { serverEnv } from "@/lib/env";
 export async function generateImageBuffer(
   prompt: string,
   kind: "logo" | "poster" = "logo",
-): Promise<Buffer | null> {
+): Promise<{ buffer: Buffer; error?: string }> {
   const key = serverEnv.DECART_API_KEY?.trim();
-  if (!key) return null;
+  if (!key)
+    return { buffer: Buffer.alloc(0), error: "DECART_API_KEY is not set" };
 
   try {
     const decart = createDecart({
@@ -20,10 +21,13 @@ export async function generateImageBuffer(
       aspectRatio: kind === "logo" ? "9:16" : "16:9",
     });
 
-    if (!image?.uint8Array?.length) return null;
-    return Buffer.from(image.uint8Array);
+    if (!image?.uint8Array?.length) {
+      return { buffer: Buffer.alloc(0), error: "Decart returned empty image" };
+    }
+    return { buffer: Buffer.from(image.uint8Array) };
   } catch (e: any) {
-    console.error("[decart] image generation failed:", e?.message ?? e);
-    return null;
+    const msg = e?.message ?? String(e);
+    console.error("[decart] image generation failed:", msg);
+    return { buffer: Buffer.alloc(0), error: `Decart API error: ${msg}` };
   }
 }

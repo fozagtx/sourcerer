@@ -20,21 +20,21 @@ export async function generateConceptImages(
 ): Promise<ConceptImageResult> {
   const warnings: string[] = [];
 
-  const logoBuf = await generateImageBuffer(input.logoPrompt, "logo");
-  const logoUrl = logoBuf ? toDataUrl(logoBuf) : "";
-  if (!logoUrl) warnings.push("Logo generation failed. Is DECART_API_KEY set?");
+  const logo = await generateImageBuffer(input.logoPrompt, "logo");
+  const logoUrl = logo.buffer.length > 0 ? toDataUrl(logo.buffer) : "";
+  if (!logoUrl) warnings.push(logo.error ?? "Logo generation failed");
 
-  const posterUrls = (
-    await Promise.all(
-      input.posterPrompts.map((p) => generateImageBuffer(p, "poster")),
-    )
-  )
-    .filter((buf): buf is Buffer => buf !== null)
-    .map(toDataUrl);
+  const posterResults = await Promise.all(
+    input.posterPrompts.map((p) => generateImageBuffer(p, "poster")),
+  );
+  const posterUrls = posterResults
+    .filter((r) => r.buffer.length > 0)
+    .map((r) => toDataUrl(r.buffer));
 
-  if (input.posterPrompts.length > 0 && posterUrls.length === 0) {
-    warnings.push("All poster generations failed. Is DECART_API_KEY set?");
-  }
+  const failedPosters = posterResults.filter(
+    (r) => r.buffer.length === 0 && r.error,
+  );
+  failedPosters.forEach((r) => warnings.push(r.error!));
 
   return { logoUrl, posterUrls, warnings };
 }
