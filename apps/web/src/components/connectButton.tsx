@@ -4,7 +4,8 @@ import dynamic from "next/dynamic";
 import { useChain } from "@/providers/chain-provider";
 
 const SolanaWalletButton = dynamic(
-  async () => (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
+  async () =>
+    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
   { ssr: false },
 );
 
@@ -16,7 +17,13 @@ const RainbowConnectButton = dynamic(
 export function ConnectButton() {
   const { chain } = useChain();
   if (chain === "bsc") {
-    return <RainbowConnectButton accountStatus="avatar" chainStatus="none" showBalance={false} />;
+    return (
+      <RainbowConnectButton
+        accountStatus="address"
+        chainStatus="icon"
+        showBalance={false}
+      />
+    );
   }
   return <SolanaWalletButton />;
 }

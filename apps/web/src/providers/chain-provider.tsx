@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type SupportedChain = "solana" | "bsc";
 
@@ -13,31 +20,41 @@ const Ctx = createContext<ChainCtx | null>(null);
 const STORAGE_KEY = "sourcerer-chain";
 
 export function ChainProvider({ children }: { children: ReactNode }) {
-  const [chain, setChainState] = useState<SupportedChain>("solana");
+  const [chain, setChainRaw] = useState<SupportedChain | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY) as SupportedChain | null;
-      if (stored === "bsc" || stored === "solana") setChainState(stored);
+      setChainRaw(stored === "bsc" || stored === "solana" ? stored : "solana");
     } catch {
-      // ignore
+      setChainRaw("solana");
     }
+    setMounted(true);
   }, []);
 
-  const value = useMemo<ChainCtx>(
-    () => ({
-      chain,
-      setChain: (c) => {
-        setChainState(c);
-        try {
-          localStorage.setItem(STORAGE_KEY, c);
-        } catch {
-          // ignore
-        }
-      },
-    }),
-    [chain],
+  const setChain = useMemo(
+    () => (c: SupportedChain) => {
+      setChainRaw(c);
+      try {
+        localStorage.setItem(STORAGE_KEY, c);
+      } catch {}
+    },
+    [],
   );
+
+  const value = useMemo<ChainCtx>(
+    () => ({ chain: chain ?? "solana", setChain }),
+    [chain, setChain],
+  );
+
+  if (!mounted) {
+    return (
+      <Ctx.Provider value={{ chain: "solana", setChain: () => {} }}>
+        {children}
+      </Ctx.Provider>
+    );
+  }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

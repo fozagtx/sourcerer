@@ -1,16 +1,23 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import type { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { ReactLenis } from "lenis/react";
 import { QueryProvider } from "@/providers/query-provider";
-import { ChainProvider } from "@/providers/chain-provider";
+import { ChainProvider, useChain } from "@/providers/chain-provider";
 import { SolanaWalletProvider } from "@/providers/wallet-provider";
+import { EvmProvider } from "@/providers/evm-provider";
 
-const EvmProvider = dynamic(
-  async () => (await import("@/providers/evm-provider")).EvmProvider,
-  { ssr: false },
-);
+const STORAGE_KEY = "sourcerer-chain";
+
+function WalletGate({ children }: { children: ReactNode }) {
+  const { chain } = useChain();
+
+  if (chain === "bsc") {
+    return <EvmProvider>{children}</EvmProvider>;
+  }
+
+  return <SolanaWalletProvider>{children}</SolanaWalletProvider>;
+}
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
@@ -25,9 +32,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     >
       <QueryProvider>
         <ChainProvider>
-          <EvmProvider>
-            <SolanaWalletProvider>{children}</SolanaWalletProvider>
-          </EvmProvider>
+          <WalletGate>{children}</WalletGate>
         </ChainProvider>
       </QueryProvider>
     </ReactLenis>
