@@ -11,12 +11,8 @@ export interface ConceptImageResult {
   warnings: string[];
 }
 
-function toDataUrl(buf: Buffer, mime: string): string {
-  const prefix =
-    mime === "image/svg+xml"
-      ? "data:image/svg+xml;base64,"
-      : "data:image/png;base64,";
-  return `${prefix}${buf.toString("base64")}`;
+function toDataUrl(buf: Buffer): string {
+  return `data:image/png;base64,${buf.toString("base64")}`;
 }
 
 export async function generateConceptImages(
@@ -24,27 +20,20 @@ export async function generateConceptImages(
 ): Promise<ConceptImageResult> {
   const warnings: string[] = [];
 
-  async function makeUrl(
-    prompt: string,
-    folder: "logos" | "posters",
-  ): Promise<string> {
-    const result = await generateImageBuffer(
-      prompt,
-      folder === "logos" ? "logo" : "poster",
-    );
-    if (!result) return "";
-    return toDataUrl(result.buf, result.mime);
-  }
-
-  const logoUrl = await makeUrl(input.logoPrompt, "logos");
-  if (!logoUrl) warnings.push("Logo generation failed.");
+  const logoBuf = await generateImageBuffer(input.logoPrompt, "logo");
+  const logoUrl = logoBuf ? toDataUrl(logoBuf) : "";
+  if (!logoUrl) warnings.push("Logo generation failed. Is DECART_API_KEY set?");
 
   const posterUrls = (
-    await Promise.all(input.posterPrompts.map((p) => makeUrl(p, "posters")))
-  ).filter(Boolean);
+    await Promise.all(
+      input.posterPrompts.map((p) => generateImageBuffer(p, "poster")),
+    )
+  )
+    .filter((buf): buf is Buffer => buf !== null)
+    .map(toDataUrl);
 
   if (input.posterPrompts.length > 0 && posterUrls.length === 0) {
-    warnings.push("All poster generations failed.");
+    warnings.push("All poster generations failed. Is DECART_API_KEY set?");
   }
 
   return { logoUrl, posterUrls, warnings };
