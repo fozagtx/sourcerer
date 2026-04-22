@@ -1,4 +1,4 @@
-import { createDecart } from "@decartai/ai-sdk-provider";
+import { decart } from "@decartai/ai-sdk-provider";
 import { generateImage } from "ai";
 import { serverEnv } from "@/lib/env";
 
@@ -11,10 +11,6 @@ export async function generateImageBuffer(
     return { buffer: Buffer.alloc(0), error: "DECART_API_KEY is not set" };
 
   try {
-    const decart = createDecart({
-      apiKey: key,
-      baseURL: "https://api.decart.ai",
-    });
     const { image } = await generateImage({
       model: decart.image("lucy-pro-t2i"),
       prompt,
