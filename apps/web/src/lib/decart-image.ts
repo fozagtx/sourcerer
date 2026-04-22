@@ -9,8 +9,6 @@ export async function generateImageBuffer(
   const key = serverEnv.DECART_API_KEY?.trim();
   if (!key) return null;
 
-  const aspectRatio = kind === "logo" ? "1:1" : "16:9";
-
   const decart = createDecart({
     apiKey: key,
     baseURL: "https://api.decart.ai",
@@ -18,7 +16,7 @@ export async function generateImageBuffer(
   const { image } = await generateImage({
     model: decart.image("lucy-pro-t2i"),
     prompt,
-    aspectRatio,
+    aspectRatio: kind === "logo" ? "9:16" : "16:9",
   });
 
   if (!image?.uint8Array?.length) return null;
