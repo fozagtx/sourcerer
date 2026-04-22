@@ -47,14 +47,19 @@ export default async function Home() {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_100%,rgba(0,0,0,0.35),transparent_50%),linear-gradient(180deg,#9e2f2a_0%,#c41e1e_45%,#9e2f2a_100%)] opacity-95"
           aria-hidden
         />
-        <div className="pointer-events-none absolute inset-0 opacity-20" aria-hidden>
+        <div
+          className="pointer-events-none absolute inset-0 opacity-20"
+          aria-hidden
+        >
           <div className="absolute left-[8%] top-12 h-2 w-2 rounded-full bg-white" />
           <div className="absolute right-[15%] top-24 h-1.5 w-1.5 rounded-full bg-white" />
           <div className="absolute bottom-32 left-[20%] h-1 w-1 rounded-full bg-white" />
         </div>
         <div className="relative z-10 mx-auto max-w-wrap px-4 sm:px-section-x">
           <LandingReveal className="mb-12 text-center">
-            <h2 className="landing-section-title inline-block text-3xl sm:text-4xl md:text-5xl">about sourcerer</h2>
+            <h2 className="landing-section-title inline-block text-3xl sm:text-4xl md:text-5xl">
+              about sourcerer
+            </h2>
           </LandingReveal>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10">
             {[
@@ -82,8 +87,12 @@ export default async function Home() {
                     i % 2 === 1 && "md:mt-10",
                   )}
                 >
-                  <h3 className="font-display text-lg lowercase text-[#ff3b2f]">{card.title}</h3>
-                  <p className="text-sm lowercase leading-relaxed text-white/95">{card.body}</p>
+                  <h3 className="font-display text-lg lowercase text-[#ff3b2f]">
+                    {card.title}
+                  </h3>
+                  <p className="text-sm lowercase leading-relaxed text-white/95">
+                    {card.body}
+                  </p>
                   <div className="mt-auto flex justify-end pt-4">
                     <PlanetBadge label="go" />
                   </div>
@@ -108,7 +117,10 @@ export default async function Home() {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(16,230,141,0.08),transparent_55%),linear-gradient(180deg,#070f14_0%,#0d1f2c_50%,#0a161c_100%)]"
           aria-hidden
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-scene-night/88 via-[#0d1f2c]/92 to-scene-night/95" aria-hidden />
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-scene-night/88 via-[#0d1f2c]/92 to-scene-night/95"
+          aria-hidden
+        />
         <div className="relative z-10 mx-auto max-w-wrap px-4 sm:px-section-x">
           <LandingReveal className="mb-10 text-center">
             <h2 className="landing-section-title inline-block text-3xl sm:text-4xl md:text-5xl">
@@ -117,17 +129,23 @@ export default async function Home() {
           </LandingReveal>
           <LandingReveal className="mx-auto max-w-3xl text-center" delay={0.06}>
             <p className="text-lg lowercase text-white/85">bonding milestone</p>
-            <p className="mt-2 font-mono text-4xl font-medium tracking-tight text-white sm:text-5xl">85 native</p>
+            <p className="mt-2 font-mono text-4xl font-medium tracking-tight text-white sm:text-5xl">
+              85 native
+            </p>
             <p className="mt-2 text-caption lowercase text-white/55">
-              solana: 85 sol · bnb chain: 85 bnb — then amm graduation
+              solana: 85 sol · bnb chain: 85 bnb · then amm graduation
             </p>
           </LandingReveal>
           <LandingReveal className="mx-auto mt-12 max-w-xl" delay={0.1}>
             <div className="comic-panel p-6 text-left">
-              <p className="font-display text-xl lowercase text-[#ff3b2f]">protocol tax — 0%</p>
+              <p className="font-display text-xl lowercase text-[#ff3b2f]">
+                protocol tax · 0%
+              </p>
               <p className="mt-3 text-sm lowercase leading-relaxed text-white/95">
-                zero. zip. nada on our side for a made-up treasury line item. you still pay network gas and pool fees like a
-                grown-up chain citizen. we keep the story straight so your holders can meme in peace.
+                zero. zip. nada on our side for a made-up treasury line item.
+                you still pay network gas and pool fees like a grown-up chain
+                citizen. we keep the story straight so your holders can meme in
+                peace.
               </p>
             </div>
           </LandingReveal>
@@ -141,7 +159,9 @@ export default async function Home() {
         />
         <div className="relative z-10 mx-auto max-w-wrap px-4 sm:px-section-x">
           <LandingReveal className="mb-4 space-y-1 text-center">
-            <p className="font-mono text-caption font-medium uppercase tracking-wider text-[#ff3b2f]">live tape</p>
+            <p className="font-mono text-caption font-medium uppercase tracking-wider text-[#ff3b2f]">
+              live tape
+            </p>
             <h2 className="flex items-center justify-center gap-2 font-display text-2xl lowercase tracking-tight text-white sm:text-3xl">
               <TrendingUp className="h-7 w-7 text-[#ff3b2f]" aria-hidden />
               fresh launches
@@ -163,7 +183,12 @@ export default async function Home() {
               </div>
             ) : (
               <ChainTabFilter
-                chainOf={Object.fromEntries(tokens.map((t) => [t.mint, (t.chain as "solana" | "bsc") ?? "solana"]))}
+                chainOf={Object.fromEntries(
+                  tokens.map((t) => [
+                    t.mint,
+                    (t.chain as "solana" | "bsc") ?? "solana",
+                  ]),
+                )}
               >
                 {tokens.map((t) => (
                   <TokenCard key={t.mint} token={t} />
@@ -174,18 +199,26 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="contact" className="relative scroll-mt-28 bg-scene-tealDeep py-20">
+      <section
+        id="contact"
+        className="relative scroll-mt-28 bg-scene-tealDeep py-20"
+      >
         <div className="mx-auto max-w-wrap px-4 sm:px-section-x">
           <LandingReveal className="mx-auto max-w-2xl">
             <div className="landing-tilt-panel bg-gradient-to-b from-[#165a4a] to-[#0d3830] p-8 text-center">
               <p className="text-sm lowercase leading-relaxed text-white/95">
-                sourcerer is experimental software. memecoins are volatile and can go to zero. nothing here is investment,
-                legal, or tax advice. dyor, do not spend rent money, and assume every ticker is a joke until proven
-                otherwise.
+                sourcerer is experimental software. memecoins are volatile and
+                can go to zero. nothing here is investment, legal, or tax
+                advice. dyor, do not spend rent money, and assume every ticker
+                is a joke until proven otherwise.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <span className="landing-pill cursor-not-allowed opacity-80">telegram (soon)</span>
-                <span className="landing-pill cursor-not-allowed opacity-80">twitter (soon)</span>
+                <span className="landing-pill cursor-not-allowed opacity-80">
+                  telegram (soon)
+                </span>
+                <span className="landing-pill cursor-not-allowed opacity-80">
+                  twitter (soon)
+                </span>
               </div>
             </div>
           </LandingReveal>

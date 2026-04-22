@@ -9,8 +9,18 @@ import { SpringPrimaryLink } from "@/components/springPrimaryLink";
 const ease = [0.16, 1, 0.3, 1] as const;
 
 const PEPE_ASSETS = [
-  { src: "/landing/pepe-banner-wide.jpeg", alt: "Pepe banner — launch mood", w: 294, h: 171 },
-  { src: "/landing/pepe-banner-alt.jpeg", alt: "Pepe banner — alternate scene", w: 300, h: 168 },
+  {
+    src: "/landing/pepe-banner-wide.jpeg",
+    alt: "Pepe banner · launch mood",
+    w: 294,
+    h: 171,
+  },
+  {
+    src: "/landing/pepe-banner-alt.jpeg",
+    alt: "Pepe banner · alternate scene",
+    w: 300,
+    h: 168,
+  },
   { src: "/landing/pepe-square.jpeg", alt: "Pepe square crop", w: 237, h: 213 },
   { src: "/landing/pepe-sticker.png", alt: "Pepe sticker", w: 277, h: 182 },
 ] as const;
@@ -88,19 +98,26 @@ export function LandingHero() {
           className="mx-auto mt-8 max-w-xl text-base font-normal lowercase leading-relaxed text-white drop-shadow-md sm:text-lg"
           {...(off ?? fadeUp(0.16))}
         >
-          sourcerer is an ai-native launcher for memecoins on solana and bnb chain. sketch a concept, mint the vibe,
-          trade the curve, and graduate into real liquidity without the usual launch theatre.
+          sourcerer is an ai-native launcher for memecoins on solana and bnb
+          chain. sketch a concept, mint the vibe, trade the curve, and graduate
+          into real liquidity without the usual launch theatre.
         </motion.p>
 
         <motion.div
           className="mt-10 flex flex-wrap items-center justify-center gap-3"
           {...(off ?? fadeUp(0.22))}
         >
-          <SpringPrimaryLink href="/create" className="landing-pill gap-2 px-6 py-3 text-base">
+          <SpringPrimaryLink
+            href="/create"
+            className="landing-pill gap-2 px-6 py-3 text-base"
+          >
             <Sparkles className="h-4 w-4" aria-hidden />
             launch with ai
           </SpringPrimaryLink>
-          <Link href="/news" className="landing-pill landing-pill--ghost px-6 py-3 text-base">
+          <Link
+            href="/news"
+            className="landing-pill landing-pill--ghost px-6 py-3 text-base"
+          >
             hot news plays
           </Link>
         </motion.div>
@@ -121,7 +138,11 @@ export function LandingHero() {
                 initial={reduce ? false : { opacity: 0, y: 12 }}
                 whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-32px" }}
-                transition={{ duration: 0.45, ease, delay: reduce ? 0 : 0.05 * i }}
+                transition={{
+                  duration: 0.45,
+                  ease,
+                  delay: reduce ? 0 : 0.05 * i,
+                }}
               >
                 <Image
                   src={asset.src}
@@ -139,10 +160,13 @@ export function LandingHero() {
           className="comic-panel mt-10 w-full max-w-md p-5 text-left"
           {...(off ?? fadeUp(0.34))}
         >
-          <p className="font-display text-lg lowercase text-[#ff3b2f]">fees — lean</p>
+          <p className="font-display text-lg lowercase text-[#ff3b2f]">
+            fees · lean
+          </p>
           <p className="mt-2 text-sm lowercase leading-relaxed text-white/95">
-            trading fees stay on-chain where they belong. we are not here to stack hidden taxes on your round trips.
-            keep the curve clean, keep the community loud.
+            trading fees stay on-chain where they belong. we are not here to
+            stack hidden taxes on your round trips. keep the curve clean, keep
+            the community loud.
           </p>
         </motion.div>
       </div>

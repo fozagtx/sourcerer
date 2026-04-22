@@ -3,7 +3,7 @@ import { Flame, ExternalLink } from "lucide-react";
 import { searchMemeCoinNews, type ExaResult } from "@/lib/exa";
 import { formatTimeAgo } from "@/lib/format";
 
-export const metadata = { title: "Hot News - Sourcerer" };
+export const metadata = { title: "Hot News · Sourcerer" };
 export const revalidate = 300;
 
 async function getNews(query?: string) {
