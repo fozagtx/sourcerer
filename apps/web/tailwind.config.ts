@@ -1,0 +1,133 @@
+import type { Config } from "tailwindcss";
+
+export default {
+  content: ["./src/**/*.{ts,tsx}"],
+  theme: {
+    extend: {
+      maxWidth: {
+        content: "73.143rem",
+        wrap: "102.857rem",
+      },
+      spacing: {
+        "section-x": "3.429rem",
+      },
+      borderRadius: {
+        card: "1.429rem",
+        inner: "5px",
+        intermediate: "0.429rem",
+        pill: "1000px",
+      },
+      fontFamily: {
+        display: [
+          "var(--font-titan-one)",
+          "var(--font-space-grotesk)",
+          "system-ui",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+        sans: [
+          "var(--font-space-grotesk)",
+          "system-ui",
+          "Helvetica Neue",
+          "Helvetica",
+          "Arial",
+          "sans-serif",
+        ],
+        mono: [
+          "var(--font-ibm-plex-mono)",
+          "ui-monospace",
+          "Cascadia Code",
+          "Source Code Pro",
+          "Menlo",
+          "Consolas",
+          "monospace",
+        ],
+      },
+      fontSize: {
+        hero: ["2rem", { lineHeight: "1.3", letterSpacing: "-0.04em", fontWeight: "300" }],
+        "section-xl": ["2.668rem", { lineHeight: "1.3", letterSpacing: "-0.032em", fontWeight: "300" }],
+        "section-lg": ["2.25rem", { lineHeight: "1.3", letterSpacing: "-0.032em", fontWeight: "300" }],
+        "subsection": ["1.75rem", { lineHeight: "1.3", letterSpacing: "-0.032em", fontWeight: "300" }],
+        "card-title": ["1.5rem", { lineHeight: "1.3", letterSpacing: "-0.032em", fontWeight: "400" }],
+        "body-lg": ["1.313rem", { lineHeight: "1.4" }],
+        body: ["1.188rem", { lineHeight: "1.57" }],
+        "body-md": ["1.063rem", { lineHeight: "1.4" }],
+        ui: ["0.938rem", { lineHeight: "1.3" }],
+        caption: ["0.75rem", { lineHeight: "1.57" }],
+        eyebrow: ["0.75rem", { lineHeight: "1.4", letterSpacing: "0.075em", fontWeight: "500" }],
+        micro: ["0.625rem", { lineHeight: "1.2", letterSpacing: "0.0625em", fontWeight: "500" }],
+      },
+      colors: {
+        page: "#0a1628",
+        canvas: {
+          DEFAULT: "#0c3d37",
+          alt: "rgba(255, 255, 255, 0.06)",
+          light: "rgba(255, 255, 255, 0.04)",
+        },
+        ink: "#f3f3ee",
+        muted: "rgba(243, 243, 238, 0.62)",
+        brand: {
+          DEFAULT: "#e6392a",
+          500: "#e6392a",
+          600: "#c41e1e",
+          light: "#ffb49a",
+        },
+        flu: {
+          green: "#10E68D",
+          "green-light": "#A9FFDB",
+          yellow: "#FDEB20",
+          "yellow-light": "#F4FD90",
+          blue: "#5FC0FF",
+          "blue-light": "#BFE4FC",
+          purple: "#D377FD",
+          "purple-light": "#E3DCF8",
+          pink: "#F392DD",
+          "pink-light": "#FAD8FF",
+        },
+        utility: {
+          98: "#134d3f",
+          95: "#0d3830",
+          91: "rgba(255, 255, 255, 0.1)",
+          81: "rgba(255, 255, 255, 0.16)",
+          61: "rgba(243, 243, 238, 0.42)",
+          16: "#f3f3ee",
+        },
+        surface: {
+          DEFAULT: "#0d3830",
+          elevated: "#134d3f",
+          muted: "rgba(255, 255, 255, 0.07)",
+          border: "rgba(255, 255, 255, 0.14)",
+          dark: "#061018",
+          darkAlt: "#040c12",
+        },
+        scene: {
+          teal: "#135a52",
+          tealSky: "#1f7a6f",
+          tealDeep: "#0c3d37",
+          rust: "#9e2f2a",
+          red: "#c41e1e",
+          redHot: "#e6392a",
+          panel: "#134d3f",
+          panelDeep: "#0d3830",
+          night: "#0a1628",
+          outline: "#2b1810",
+        },
+      },
+      boxShadow: {
+        elev1: "0.5px 1px 1px hsl(0 0% 0% / 0.3)",
+        elev2:
+          "2px 2px 4px hsl(0 0% 0% / 0.1), 4px 4px 8px hsl(0 0% 0% / 0.1), 6px 6px 12px hsl(0 0% 0% / 0.1)",
+        elev3:
+          "2px 2px 4px hsl(0 0% 0% / 0.06), 4px 4px 8px hsl(0 0% 0% / 0.06), 8px 8px 16px hsl(0 0% 0% / 0.06), 16px 16px 32px hsl(0 0% 0% / 0.06)",
+        glow: "0 0 48px rgba(230, 57, 42, 0.22)",
+      },
+      transitionTimingFunction: {
+        expo: "cubic-bezier(0.19, 1, 0.22, 1)",
+        bounce: "cubic-bezier(0.4, 0.05, 0.22, 1.2)",
+        circular: "cubic-bezier(0.075, 0.82, 0.165, 1)",
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config;

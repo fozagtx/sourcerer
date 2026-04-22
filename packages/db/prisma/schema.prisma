@@ -1,0 +1,161 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Chain {
+  solana
+  bsc
+}
+
+model Token {
+  mint             String    @id
+  chain            Chain     @default(solana)
+  creator          String
+  name             String
+  symbol           String
+  description      String?
+  imageUrl         String?
+  metadataUri      String
+  posters          String[]  @default([])
+  sourceNewsItemId String?
+  virtualSol       BigInt    @default(30000000000)
+  virtualTokens    BigInt    @default(1073000000000000)
+  realSol          BigInt    @default(0)
+  realTokens       BigInt    @default(793100000000000)
+  priceSol         Float     @default(0)
+  marketCapSol     Float     @default(0)
+  volumeSol24h     Float     @default(0)
+  holderCount      Int       @default(0)
+  graduated        Boolean   @default(false)
+  graduatedAt      DateTime?
+  raydiumPool      String?
+  pancakePair      String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  trades   Trade[]
+  holders  Holder[]
+  comments Comment[]
+  candles  Candle[]
+
+  @@index([createdAt])
+  @@index([marketCapSol])
+  @@index([graduated])
+  @@index([chain, createdAt])
+}
+
+model Trade {
+  id           String   @id @default(cuid())
+  signature    String   @unique
+  mint         String
+  trader       String
+  isBuy        Boolean
+  solAmount    BigInt
+  tokenAmount  BigInt
+  feeAmount    BigInt
+  priceSol     Float
+  virtualSol   BigInt
+  virtualTokens BigInt
+  timestamp    DateTime
+  slot         BigInt
+
+  token Token @relation(fields: [mint], references: [mint], onDelete: Cascade)
+
+  @@index([mint, timestamp])
+  @@index([trader])
+}
+
+model Holder {
+  id       String @id @default(cuid())
+  mint     String
+  owner    String
+  balance  BigInt
+  updatedAt DateTime @updatedAt
+
+  token Token @relation(fields: [mint], references: [mint], onDelete: Cascade)
+
+  @@unique([mint, owner])
+  @@index([mint, balance])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  mint      String
+  author    String
+  body      String
+  createdAt DateTime @default(now())
+
+  token Token @relation(fields: [mint], references: [mint], onDelete: Cascade)
+
+  @@index([mint, createdAt])
+}
+
+model Candle {
+  id         String   @id @default(cuid())
+  mint       String
+  interval   String
+  openTime   DateTime
+  open       Float
+  high       Float
+  low        Float
+  close      Float
+  volumeSol  Float
+
+  token Token @relation(fields: [mint], references: [mint], onDelete: Cascade)
+
+  @@unique([mint, interval, openTime])
+  @@index([mint, interval, openTime])
+}
+
+model NewsItem {
+  id               String   @id @default(cuid())
+  country          String
+  source           String
+  url              String   @unique
+  title            String
+  summary          String
+  imageUrl         String?
+  publishedAt      DateTime
+  memeScore        Float
+  suggestedName    String?
+  suggestedSymbol  String?
+  suggestedPrompt  String?
+  used             Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@index([country, memeScore])
+  @@index([createdAt])
+}
+
+model AiConcept {
+  id           String   @id @default(cuid())
+  keyword      String
+  name         String
+  symbol       String
+  description  String
+  logoPrompt   String
+  posterPrompts String[] @default([])
+  logoUrl      String?
+  posterUrls   String[] @default([])
+  createdAt    DateTime @default(now())
+
+  @@index([keyword])
+}
+
+model Nonce {
+  wallet    String   @id
+  nonce     String
+  expiresAt DateTime
+}
+
+model ChainCursor {
+  chain       Chain   @id
+  lastBlock   BigInt  @default(0)
+  updatedAt   DateTime @updatedAt
+}

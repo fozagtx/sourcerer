@@ -1,0 +1,325 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #0a1628;
+  color: #f3f3ee;
+}
+
+@layer components {
+  /* Explicit rules: @apply cannot resolve custom theme fontSize keys (e.g. text-eyebrow, text-ui) in this file. */
+  .eyebrow {
+    @apply font-mono uppercase;
+    color: #e6392a;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.075em;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-pill px-4 py-2.5 font-semibold lowercase text-white transition-all duration-150 ease-in-out;
+    border: 2px solid #2b1810;
+    background: #c41e1e;
+    box-shadow: 3px 3px 0 #2b1810;
+    font-size: 0.938rem;
+    line-height: 1.3;
+  }
+  .btn-primary:hover {
+    @apply -translate-x-px -translate-y-px;
+    background: #e6392a;
+    box-shadow: 4px 4px 0 #2b1810;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-pill border-2 border-white/80 bg-transparent px-4 py-2.5 font-semibold lowercase text-ink shadow-[3px_3px_0_rgba(0,0,0,0.35)] transition-all duration-150 ease-in-out;
+    font-size: 0.938rem;
+    line-height: 1.3;
+  }
+  .btn-secondary:hover {
+    border-color: #e6392a;
+    color: #e6392a;
+  }
+}
+
+/* ---------- Solana wallet-adapter button ---------- */
+.wallet-adapter-button {
+  background: #d62828 !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
+  border-radius: 1000px !important;
+  height: 40px !important;
+  padding: 0 16px !important;
+  max-width: 100%;
+  font-size: 15px !important;
+  font-family: var(--font-space-grotesk), system-ui, sans-serif !important;
+  transition: all 0.15s ease-in-out !important;
+}
+.wallet-adapter-button:not([disabled]):hover {
+  background: #e6392a !important;
+  color: #ffffff !important;
+  filter: brightness(1.06);
+}
+.wallet-adapter-button-trigger {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
+@media (max-width: 480px) {
+  .wallet-adapter-button {
+    height: 36px !important;
+    padding: 0 12px !important;
+    font-size: 14px !important;
+  }
+  .wallet-adapter-button-trigger {
+    max-width: 120px;
+  }
+  .wallet-adapter-button-start-icon,
+  .wallet-adapter-button-end-icon {
+    display: none !important;
+  }
+}
+
+/* ---------- Solana wallet-adapter modal ---------- */
+.wallet-adapter-modal-overlay {
+  background: rgba(6, 16, 24, 0.72) !important;
+  backdrop-filter: blur(4px);
+}
+
+.wallet-adapter-modal-wrapper {
+  background: #134d3f !important;
+  color: #f3f3ee !important;
+  border: 2px solid #0a2a24 !important;
+  border-radius: 1.429rem !important;
+  box-shadow:
+    2px 2px 4px hsl(0 0% 0% / 0.06),
+    4px 4px 8px hsl(0 0% 0% / 0.06),
+    8px 8px 16px hsl(0 0% 0% / 0.06),
+    16px 16px 32px hsl(0 0% 0% / 0.06) !important;
+  max-width: min(420px, calc(100vw - 24px)) !important;
+  width: 100% !important;
+  margin: 12px !important;
+  max-height: calc(100vh - 24px) !important;
+  overflow-y: auto;
+}
+
+.wallet-adapter-modal-container {
+  padding: 12px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #f3f3ee !important;
+  font-size: 1.25rem !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.02em !important;
+  padding: 24px 20px 8px !important;
+  text-align: center;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 !important;
+  padding: 8px 12px 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #f3f3ee !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 1.429rem !important;
+  height: 52px !important;
+  padding: 0 16px !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  width: 100% !important;
+  justify-content: space-between;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease !important;
+}
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background: rgba(255, 255, 255, 0.11) !important;
+  border-color: rgba(230, 57, 42, 0.55) !important;
+  color: #f3f3ee !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background: transparent !important;
+  top: 12px !important;
+  right: 12px !important;
+}
+.wallet-adapter-modal-button-close svg {
+  fill: rgba(243, 243, 238, 0.55) !important;
+}
+
+.wallet-adapter-modal-list-more {
+  color: #e6392a !important;
+  font-size: 14px !important;
+}
+
+@media (max-width: 480px) {
+  .wallet-adapter-modal-wrapper {
+    border-radius: 1rem !important;
+    margin: 8px !important;
+    max-height: calc(100vh - 16px) !important;
+  }
+  .wallet-adapter-modal-container {
+    padding: 8px !important;
+  }
+  .wallet-adapter-modal-title {
+    font-size: 1.125rem !important;
+    padding: 20px 16px 4px !important;
+  }
+  .wallet-adapter-modal-list {
+    padding: 8px 10px 16px !important;
+  }
+  .wallet-adapter-modal-list .wallet-adapter-button {
+    height: 48px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* ---------- RainbowKit modal ---------- */
+[data-rk] div[role="dialog"] {
+  max-width: min(420px, calc(100vw - 24px)) !important;
+  max-height: calc(100vh - 24px) !important;
+}
+
+/* Calmer wallet list: no hover scale; static loader (hashed RK classes — bump if RK updates) */
+[data-rk] [role="dialog"] ._12cbo8i3,
+[data-rk] [role="dialog"] ._12cbo8i3::after {
+  --_12cbo8i0: 1 !important;
+  --_12cbo8i1: 1 !important;
+}
+[data-rk] [role="dialog"] ._1luule42 {
+  animation: none !important;
+}
+
+@media (max-width: 480px) {
+  [data-rk] div[role="dialog"] {
+    border-radius: 1rem !important;
+  }
+}
+
+/* ---------- Rail scrollbar ---------- */
+.rail::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.rail::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* ---------- Retro landing (Sourcerer) ---------- */
+@layer utilities {
+  .bleed-viewport {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+  }
+}
+
+.landing-sticker {
+  font-family: var(--font-titan-one), system-ui, sans-serif;
+  font-weight: 400;
+  color: #ff3b2f;
+  text-transform: lowercase;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-shadow:
+    2px 0 0 #fff,
+    -2px 0 0 #fff,
+    0 2px 0 #fff,
+    0 -2px 0 #fff,
+    3px 3px 0 #2b1810,
+    6px 6px 0 rgba(43, 24, 16, 0.35);
+}
+
+.landing-section-title {
+  font-family: var(--font-titan-one), system-ui, sans-serif;
+  font-weight: 400;
+  color: #ff3b2f;
+  text-transform: lowercase;
+  letter-spacing: -0.02em;
+  text-shadow:
+    1px 0 0 #fff,
+    -1px 0 0 #fff,
+    0 1px 0 #fff,
+    0 -1px 0 #fff,
+    3px 3px 0 #2b1810;
+  transform: rotate(-2deg);
+}
+
+.landing-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #d62828;
+  color: #fff;
+  font-weight: 600;
+  text-transform: lowercase;
+  padding: 0.4rem 1rem;
+  font-size: 0.875rem;
+  border: 2px solid #2b1810;
+  box-shadow: 3px 3px 0 #2b1810;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.landing-pill:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #2b1810;
+}
+
+.landing-pill--ghost {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.landing-arch-card {
+  border-radius: 48% 48% 18px 18px / 28% 28% 18px 18px;
+  background: linear-gradient(180deg, #165a4a 0%, #0d3830 100%);
+  border: 3px solid #0a2a24;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
+}
+
+.landing-tilt-panel {
+  transform: rotate(-1.5deg);
+  border-radius: 16px;
+  border: 3px solid #0a2a24;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
+}
+
+.landing-footer-bar {
+  background: #0d3830;
+  border-top: 3px solid #0a2a24;
+}
+
+/* Comic panels — match reference mockup (thick outline + offset shadow) */
+.comic-panel {
+  border: 3px solid #2b1810;
+  border-radius: 1.25rem;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
+  background: linear-gradient(180deg, #165a4a 0%, #134d3f 100%);
+}
+
+.comic-panel--dark {
+  background: linear-gradient(180deg, #0d2838 0%, #061018 100%);
+}
+
+.comic-panel--rust {
+  background: linear-gradient(180deg, #8b2e26 0%, #6e241c 100%);
+}

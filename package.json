@@ -1,0 +1,50 @@
+{
+  "name": "sourcerer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sourcerer - AI-driven memecoin launcher on Solana and BNB Chain",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "programs/*"
+  ],
+  "scripts": {
+    "postinstall": "pnpm --filter @sourcerer/db exec prisma generate",
+    "dev:web": "pnpm --filter @sourcerer/web dev",
+    "dev:indexer": "pnpm --filter @sourcerer/indexer dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "anchor:build": "cd programs/sourcerer && anchor build",
+    "anchor:test": "cd programs/sourcerer && anchor test",
+    "anchor:deploy:devnet": "cd programs/sourcerer && anchor deploy --provider.cluster devnet",
+    "bsc:build": "cd contracts/bsc && forge build",
+    "bsc:test": "cd contracts/bsc && forge test",
+    "bsc:deploy:testnet": "cd contracts/bsc && forge script script/Deploy.s.sol:DeployScript --rpc-url bsc_testnet --broadcast",
+    "wallet:new": "tsx scripts/new-deploy-wallet.ts",
+    "deploy:contracts": "bash scripts/deploy-contracts.sh",
+    "db:push": "pnpm --filter @sourcerer/db push",
+    "db:generate": "pnpm --filter @sourcerer/db generate",
+    "db:migrate": "pnpm --filter @sourcerer/db migrate",
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules programs/*/node_modules apps/*/.next",
+    "clean:install": "pnpm run clean && pnpm install",
+    "fix": "pnpm run clean:install"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "pnpm": {
+    "overrides": {
+      "react": "^19.2.0",
+      "react-dom": "^19.2.0"
+    }
+  },
+  "devDependencies": {
+    "@solana/web3.js": "^1.95.3",
+    "prettier": "^3.3.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.4.5",
+    "viem": "^2.21.1"
+  }
+}
