@@ -10,6 +10,7 @@ import { parseEther, parseUnits } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { toast } from "sonner";
 import clsx from "clsx";
+import { SpringPrimaryButton } from "@/components/springPrimaryButton";
 import { clientEnv } from "@/lib/env";
 
 type Side = "buy" | "sell";
@@ -216,19 +217,19 @@ export function TradePanel({
         </div>
       </div>
 
-      <button
+      <SpringPrimaryButton
         type="button"
         onClick={submit}
         disabled={pending}
         className={clsx(
-          "w-full rounded-pill py-2.5 text-ui font-normal transition-all duration-150 ease-in-out disabled:opacity-60",
+          "w-full rounded-pill py-2.5 text-ui font-normal disabled:opacity-60",
           side === "buy"
             ? "bg-brand-500 text-white hover:bg-white hover:text-brand-500"
             : "bg-brand-600 text-white hover:bg-white hover:text-brand-600",
         )}
       >
         {pending ? "Submitting…" : side === "buy" ? `Buy ${symbol}` : `Sell ${symbol}`}
-      </button>
+      </SpringPrimaryButton>
     </div>
   );
 }

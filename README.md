@@ -39,9 +39,11 @@ Copy `.env.example` into `.env.local` at the repo root. Key vars:
 # Database
 DATABASE_URL=postgresql://sourcerer:sourcerer@localhost:5432/sourcerer
 
-# AI (optional; falls back to deterministic mock when missing)
+# AI (optional — requires keys below for real concepts / images)
+# Images: Decart only — DECART_API_KEY
+DECART_API_KEY=
+# OPENAI_API_KEY: GPT concepts when OpenRouter is not set (not used for images)
 OPENAI_API_KEY=sk-...
-REPLICATE_API_TOKEN=r8_...
 
 # Solana
 NEXT_PUBLIC_SOLANA_RPC=https://api.devnet.solana.com

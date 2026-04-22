@@ -278,8 +278,16 @@ body {
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 .landing-pill:hover {
-  transform: translate(-1px, -1px);
   box-shadow: 4px 4px 0 #2b1810;
+}
+.landing-pill:hover:not(.landing-pill--motion) {
+  transform: translate(-1px, -1px);
+}
+
+/* Framer Motion owns transform on spring links; avoid CSS transform transition fighting the spring. */
+.landing-pill.landing-pill--motion {
+  transition: box-shadow 0.12s ease, border-color 0.12s ease, background-color 0.12s ease,
+    color 0.12s ease;
 }
 
 .landing-pill--ghost {

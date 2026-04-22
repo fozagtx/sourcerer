@@ -1,25 +1,38 @@
-import { NextResponse } from "next/server";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 import { buildSignInMessage } from "@/lib/auth";
+import { parseJsonBody } from "@/lib/api/body";
+import { authNoncePostSchema } from "@/lib/api/contracts";
+import { apiErrors } from "@/lib/api/errors";
+import { apiPost, okJson } from "@/lib/api/handler";
 
 export async function POST(req: Request) {
-  const { wallet } = await req.json();
-  if (!wallet || typeof wallet !== "string") {
-    return NextResponse.json({ error: "wallet required" }, { status: 400 });
-  }
-  if (!isDatabaseConfigured) {
-    return NextResponse.json({ error: "database unavailable" }, { status: 503 });
-  }
-  const nonce = crypto.randomUUID();
-  const expiresAt = new Date(Date.now() + 5 * 60_000);
-  try {
-    await prisma.nonce.upsert({
-      where: { wallet },
-      create: { wallet, nonce, expiresAt },
-      update: { nonce, expiresAt },
-    });
-  } catch {
-    return NextResponse.json({ error: "database unavailable" }, { status: 503 });
-  }
-  return NextResponse.json({ message: buildSignInMessage(wallet, nonce), nonce });
+  return apiPost(req, async ({ req, requestId }) => {
+    const { wallet } = await parseJsonBody(req, authNoncePostSchema);
+
+    if (!isDatabaseConfigured) {
+      throw apiErrors.serviceUnavailable(
+        "Database is not configured.",
+        "DATABASE_UNAVAILABLE",
+        "Set DATABASE_URL and run migrations, or run with a configured Postgres.",
+      );
+    }
+
+    const nonce = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 5 * 60_000);
+    try {
+      await prisma.nonce.upsert({
+        where: { wallet },
+        create: { wallet, nonce, expiresAt },
+        update: { nonce, expiresAt },
+      });
+    } catch {
+      throw apiErrors.serviceUnavailable(
+        "Could not persist nonce.",
+        "DATABASE_ERROR",
+        "Check database connectivity and try again.",
+      );
+    }
+
+    return okJson({ message: buildSignInMessage(wallet, nonce), nonce }, requestId);
+  });
 }

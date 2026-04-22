@@ -1,46 +1,64 @@
-import { NextResponse } from "next/server";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 import { walletFromAuthHeader } from "@/lib/auth";
+import { parseJsonBody } from "@/lib/api/body";
+import { commentPostSchema, mintParamSchema } from "@/lib/api/contracts";
+import { ApiRouteError, apiErrors } from "@/lib/api/errors";
+import { apiGetWithParams, apiPostWithParams, okJson } from "@/lib/api/handler";
 
 export async function GET(_req: Request, ctx: { params: Promise<{ mint: string }> }) {
-  const { mint } = await ctx.params;
-  if (!isDatabaseConfigured) return NextResponse.json([]);
-  try {
-    const comments = await prisma.comment.findMany({
-      where: { mint },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-    });
-    return NextResponse.json(comments);
-  } catch {
-    return NextResponse.json([]);
-  }
+  return apiGetWithParams(_req, ctx, async ({ requestId, params }) => {
+    const p = mintParamSchema.safeParse(params);
+    if (!p.success) throw apiErrors.validation(p.error.flatten());
+    const { mint } = p.data;
+
+    if (!isDatabaseConfigured) return okJson([], requestId);
+    try {
+      const comments = await prisma.comment.findMany({
+        where: { mint },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      });
+      return okJson(comments, requestId);
+    } catch {
+      return okJson([], requestId);
+    }
+  });
 }
 
 export async function POST(req: Request, ctx: { params: Promise<{ mint: string }> }) {
-  const { mint } = await ctx.params;
-  const wallet = await walletFromAuthHeader(req.headers.get("authorization"));
-  if (!wallet) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  return apiPostWithParams(req, ctx, async ({ req, requestId, params }) => {
+    const p = mintParamSchema.safeParse(params);
+    if (!p.success) throw apiErrors.validation(p.error.flatten());
+    const { mint } = p.data;
 
-  const { body } = await req.json();
-  const text = String(body ?? "").trim();
-  if (!text || text.length > 1000) {
-    return NextResponse.json({ error: "invalid body" }, { status: 400 });
-  }
+    const wallet = await walletFromAuthHeader(req.headers.get("authorization"));
+    if (!wallet) throw apiErrors.unauthorized();
 
-  if (!isDatabaseConfigured) {
-    return NextResponse.json({ error: "database unavailable" }, { status: 503 });
-  }
+    const { body: text } = await parseJsonBody(req, commentPostSchema);
 
-  try {
-    const token = await prisma.token.findUnique({ where: { mint } });
-    if (!token) return NextResponse.json({ error: "token not found" }, { status: 404 });
+    if (!isDatabaseConfigured) {
+      throw apiErrors.serviceUnavailable(
+        "Database is not configured.",
+        "DATABASE_UNAVAILABLE",
+        "Set DATABASE_URL for comments.",
+      );
+    }
 
-    const comment = await prisma.comment.create({
-      data: { mint, author: wallet, body: text },
-    });
-    return NextResponse.json(comment);
-  } catch {
-    return NextResponse.json({ error: "database unavailable" }, { status: 503 });
-  }
+    try {
+      const token = await prisma.token.findUnique({ where: { mint } });
+      if (!token) throw apiErrors.notFound("Token", "mint");
+
+      const comment = await prisma.comment.create({
+        data: { mint, author: wallet, body: text },
+      });
+      return okJson(comment, requestId);
+    } catch (e) {
+      if (e instanceof ApiRouteError) throw e;
+      throw apiErrors.serviceUnavailable(
+        "Could not create comment.",
+        "DATABASE_ERROR",
+        "Check database connectivity.",
+      );
+    }
+  });
 }

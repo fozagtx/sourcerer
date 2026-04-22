@@ -12,6 +12,9 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useChain } from "@/providers/chain-provider";
 import { clientEnv } from "@/lib/env";
+import { messageFromApiErrorBody } from "@/lib/api/client-message";
+import { SpringPrimaryButton } from "@/components/springPrimaryButton";
+import { PresenceFlexCollapse } from "@/components/presenceFlexCollapse";
 
 interface Initial {
   name: string;
@@ -27,7 +30,7 @@ interface AiConcept {
   logoUrl: string;
   posterUrls: string[];
   metadataUri: string;
-  conceptSource?: "openrouter" | "openai" | "demo";
+  conceptSource?: "openrouter" | "openai";
   warnings?: string[];
 }
 
@@ -66,32 +69,27 @@ export function CreateTokenForm({ initial }: { initial: Initial }) {
       });
       const raw = await res.text();
       if (!res.ok) {
-        let msg = raw || `Request failed (${res.status})`;
-        try {
-          const j = JSON.parse(raw) as { error?: unknown };
-          if (typeof j.error === "string") msg = j.error;
-          else if (j.error != null) msg = JSON.stringify(j.error);
-        } catch {
-          /* keep msg */
-        }
-        throw new Error(msg);
+        throw new Error(messageFromApiErrorBody(raw) || `Request failed (${res.status})`);
       }
       const c: AiConcept = JSON.parse(raw) as AiConcept;
       setName(c.name);
       setSymbol(c.symbol);
       setDescription(c.description);
-      setLogoUrl(c.logoUrl);
-      setPosterUrls(c.posterUrls);
-      setMetadataUri(c.metadataUri);
+      setLogoUrl(c.logoUrl ?? "");
+      setPosterUrls(Array.isArray(c.posterUrls) ? c.posterUrls : []);
+      setMetadataUri(c.metadataUri ?? "");
+      const noImages = !(c.logoUrl ?? "").trim() && (!c.posterUrls || c.posterUrls.length === 0);
       if (c.warnings?.length) {
-        c.warnings.forEach((w) => toast.message(w, { duration: 6_000 }));
+        c.warnings.forEach((w) => toast.message(w, { duration: 8_000 }));
+      }
+      if (noImages) {
+        toast.error(
+          "Concept loaded but no images. Set DECART_API_KEY and check server logs for [decart]. OpenRouter only generates text.",
+          { duration: 12_000 },
+        );
       }
       toast.success(
-        c.conceptSource === "demo"
-          ? "Concept generated (demo / partial)"
-          : c.conceptSource === "openrouter"
-            ? "Concept generated (OpenRouter)"
-            : "Concept generated",
+        c.conceptSource === "openrouter" ? "Concept generated (OpenRouter)" : "Concept generated",
       );
     } catch (err: any) {
       toast.error(err.message ?? "Generation failed");
@@ -195,7 +193,7 @@ export function CreateTokenForm({ initial }: { initial: Initial }) {
       : "Pennies in BNB gas. Still beats a bridge queue.";
 
   return (
-    <div className="comic-panel space-y-6 p-6 md:p-8">
+    <div className="comic-panel flex flex-col gap-6 p-6 md:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="eyebrow">chain</p>
@@ -215,15 +213,15 @@ export function CreateTokenForm({ initial }: { initial: Initial }) {
           placeholder="keyword, vibe, or paste a full headline"
           className="min-w-0 flex-1 rounded-pill border border-surface-border bg-canvas-light px-4 py-3 text-ui text-ink outline-none transition-all duration-150 ease-in-out focus:border-brand-500"
         />
-        <button
+        <SpringPrimaryButton
           type="button"
           onClick={generate}
           disabled={generating}
-          className="inline-flex items-center justify-center gap-2 rounded-pill bg-brand-500 px-5 py-3 text-ui font-normal text-white transition-all duration-150 ease-in-out hover:bg-white hover:text-brand-500 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-pill bg-brand-500 px-5 py-3 text-ui font-normal text-white hover:bg-white hover:text-brand-500 disabled:opacity-60"
         >
           {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           generate package
-        </button>
+        </SpringPrimaryButton>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[140px_1fr]">
@@ -277,7 +275,7 @@ export function CreateTokenForm({ initial }: { initial: Initial }) {
         </div>
       </div>
 
-      {posterUrls.length > 0 && (
+      <PresenceFlexCollapse show={posterUrls.length > 0} parentGapPx={24} blur>
         <div>
           <label className="mb-2 block font-mono text-micro uppercase tracking-wider text-brand-500">
             Meme posters
@@ -289,19 +287,19 @@ export function CreateTokenForm({ initial }: { initial: Initial }) {
             ))}
           </div>
         </div>
-      )}
+      </PresenceFlexCollapse>
 
       <div className="flex flex-col gap-3 border-t border-surface-border pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-caption text-muted">{feeHint}</p>
-        <button
+        <SpringPrimaryButton
           type="button"
           onClick={deploy}
           disabled={deploying || !connected}
-          className="inline-flex items-center justify-center gap-2 rounded-pill bg-brand-500 px-6 py-2.5 text-ui font-normal text-white transition-all duration-150 ease-in-out hover:bg-white hover:text-brand-500 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-pill bg-brand-500 px-6 py-2.5 text-ui font-normal text-white hover:bg-white hover:text-brand-500 disabled:opacity-60"
         >
           {deploying ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {connected ? `Deploy on ${chain === "solana" ? "Solana" : "BNB Chain"}` : "Connect wallet"}
-        </button>
+        </SpringPrimaryButton>
       </div>
     </div>
   );

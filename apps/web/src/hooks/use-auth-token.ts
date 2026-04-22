@@ -4,6 +4,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useCallback, useEffect, useState } from "react";
 import bs58 from "bs58";
 import { toast } from "sonner";
+import { messageFromApiErrorBody } from "@/lib/api/client-message";
 
 const STORAGE_KEY = "sourcerer-auth-token";
 
@@ -32,15 +33,22 @@ export function useAuthToken() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ wallet: walletStr }),
       });
-      const { message } = await nonceRes.json();
+      const nonceText = await nonceRes.text();
+      if (!nonceRes.ok) {
+        throw new Error(messageFromApiErrorBody(nonceText) || "Nonce request failed");
+      }
+      const { message } = JSON.parse(nonceText) as { message: string };
       const sig = await wallet.signMessage(new TextEncoder().encode(message));
       const verifyRes = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ wallet: walletStr, signature: bs58.encode(sig) }),
       });
-      if (!verifyRes.ok) throw new Error("verify failed");
-      const { token } = await verifyRes.json();
+      const verifyText = await verifyRes.text();
+      if (!verifyRes.ok) {
+        throw new Error(messageFromApiErrorBody(verifyText) || "Verify failed");
+      }
+      const { token } = JSON.parse(verifyText) as { token: string };
       localStorage.setItem(`${STORAGE_KEY}:${walletStr}`, token);
       setToken(token);
       return token;

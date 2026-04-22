@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { SpringPrimaryLink } from "@/components/springPrimaryLink";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -95,10 +96,10 @@ export function LandingHero() {
           className="mt-10 flex flex-wrap items-center justify-center gap-3"
           {...(off ?? fadeUp(0.22))}
         >
-          <Link href="/create" className="landing-pill gap-2 px-6 py-3 text-base">
+          <SpringPrimaryLink href="/create" className="landing-pill gap-2 px-6 py-3 text-base">
             <Sparkles className="h-4 w-4" aria-hidden />
             launch with ai
-          </Link>
+          </SpringPrimaryLink>
           <Link href="/news" className="landing-pill landing-pill--ghost px-6 py-3 text-base">
             hot news plays
           </Link>

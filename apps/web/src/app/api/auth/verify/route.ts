@@ -1,36 +1,53 @@
-import { NextResponse } from "next/server";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 import { buildSignInMessage, issueToken, verifySignature } from "@/lib/auth";
+import { parseJsonBody } from "@/lib/api/body";
+import { authVerifyPostSchema } from "@/lib/api/contracts";
+import { apiErrors } from "@/lib/api/errors";
+import { apiPost, okJson } from "@/lib/api/handler";
 
 export async function POST(req: Request) {
-  const { wallet, signature } = await req.json();
-  if (!wallet || !signature) {
-    return NextResponse.json({ error: "wallet and signature required" }, { status: 400 });
-  }
-  if (!isDatabaseConfigured) {
-    return NextResponse.json({ error: "database unavailable" }, { status: 503 });
-  }
+  return apiPost(req, async ({ req, requestId }) => {
+    const { wallet, signature } = await parseJsonBody(req, authVerifyPostSchema);
 
-  let row;
-  try {
-    row = await prisma.nonce.findUnique({ where: { wallet } });
-  } catch {
-    return NextResponse.json({ error: "database unavailable" }, { status: 503 });
-  }
-  if (!row || row.expiresAt < new Date()) {
-    return NextResponse.json({ error: "nonce expired" }, { status: 400 });
-  }
+    if (!isDatabaseConfigured) {
+      throw apiErrors.serviceUnavailable(
+        "Database is not configured.",
+        "DATABASE_UNAVAILABLE",
+        "Set DATABASE_URL and run migrations.",
+      );
+    }
 
-  const message = buildSignInMessage(wallet, row.nonce);
-  if (!verifySignature(wallet, message, signature)) {
-    return NextResponse.json({ error: "invalid signature" }, { status: 401 });
-  }
+    let row;
+    try {
+      row = await prisma.nonce.findUnique({ where: { wallet } });
+    } catch {
+      throw apiErrors.serviceUnavailable(
+        "Could not read nonce.",
+        "DATABASE_ERROR",
+        "Check database connectivity.",
+      );
+    }
 
-  try {
-    await prisma.nonce.delete({ where: { wallet } });
-  } catch {
-    return NextResponse.json({ error: "database unavailable" }, { status: 503 });
-  }
-  const token = await issueToken(wallet);
-  return NextResponse.json({ token });
+    if (!row || row.expiresAt < new Date()) {
+      throw apiErrors.nonceExpired();
+    }
+
+    const message = buildSignInMessage(wallet, row.nonce);
+    if (!verifySignature(wallet, message, signature)) {
+      throw apiErrors.unauthorized("Invalid wallet signature.", "signature");
+    }
+
+    try {
+      await prisma.nonce.delete({ where: { wallet } });
+    } catch {
+      throw apiErrors.serviceUnavailable(
+        "Could not complete sign-in.",
+        "DATABASE_ERROR",
+        "Check database connectivity.",
+      );
+    }
+
+    const token = await issueToken(wallet);
+    return okJson({ token }, requestId);
+  });
 }
