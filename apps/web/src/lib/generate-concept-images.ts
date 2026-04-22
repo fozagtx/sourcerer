@@ -1,6 +1,4 @@
-import { generateDecartImageBuffer } from "@/lib/decart-image";
-import { serverEnv } from "@/lib/env";
-import { persistPngBytes } from "@/lib/storage";
+import { generateImageBuffer } from "@/lib/decart-image";
 
 export interface ConceptImageInput {
   logoPrompt: string;
@@ -10,39 +8,43 @@ export interface ConceptImageInput {
 export interface ConceptImageResult {
   logoUrl: string;
   posterUrls: string[];
-  /** Populated when no image backend produced output */
   warnings: string[];
 }
 
-async function generateRasterUrl(prompt: string, folder: "logos" | "posters"): Promise<string> {
-  if (!serverEnv.DECART_API_KEY?.trim()) return "";
-
-  const kind = folder === "logos" ? "logo" : "poster";
-  const buf = await generateDecartImageBuffer(prompt, kind);
-  if (!buf) return "";
-  return persistPngBytes(buf, folder);
+function toDataUrl(buf: Buffer, mime: string): string {
+  const prefix =
+    mime === "image/svg+xml"
+      ? "data:image/svg+xml;base64,"
+      : "data:image/png;base64,";
+  return `${prefix}${buf.toString("base64")}`;
 }
 
-/** Server-only: logo + posters via Decart (`DECART_API_KEY`). */
-export async function generateConceptImages(input: ConceptImageInput): Promise<ConceptImageResult> {
+export async function generateConceptImages(
+  input: ConceptImageInput,
+): Promise<ConceptImageResult> {
   const warnings: string[] = [];
 
-  if (!serverEnv.DECART_API_KEY?.trim()) {
-    warnings.push("DECART_API_KEY is not set — images require Decart.");
-    return { logoUrl: "", posterUrls: [], warnings };
+  async function makeUrl(
+    prompt: string,
+    folder: "logos" | "posters",
+  ): Promise<string> {
+    const result = await generateImageBuffer(
+      prompt,
+      folder === "logos" ? "logo" : "poster",
+    );
+    if (!result) return "";
+    return toDataUrl(result.buf, result.mime);
   }
 
-  const logoUrl = await generateRasterUrl(input.logoPrompt, "logos");
-  if (!logoUrl) {
-    warnings.push("Logo empty: Decart did not return an image. Check DECART_API_KEY and server logs for [decart].");
-  }
+  const logoUrl = await makeUrl(input.logoPrompt, "logos");
+  if (!logoUrl) warnings.push("Logo generation failed.");
 
   const posterUrls = (
-    await Promise.all(input.posterPrompts.map((p) => generateRasterUrl(p, "posters")))
+    await Promise.all(input.posterPrompts.map((p) => makeUrl(p, "posters")))
   ).filter(Boolean);
 
   if (input.posterPrompts.length > 0 && posterUrls.length === 0) {
-    warnings.push("Posters empty: Decart failed for all poster prompts — check logs for [decart].");
+    warnings.push("All poster generations failed.");
   }
 
   return { logoUrl, posterUrls, warnings };

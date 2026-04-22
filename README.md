@@ -4,12 +4,93 @@
 
 Type an idea → GPT-4o drafts a full concept (name, ticker, description, logo, posters) → one click deploys an SPL Token-2022 (Solana) or ERC-20 (BNB Chain) and seeds a bonding-curve market. At 85 SOL / 85 BNB the curve auto-graduates to Raydium / PancakeSwap and LP is burned.
 
+## Architecture
+
+```mermaid
+graph TB
+    subgraph Frontend
+        WEB["apps/web<br/>Next.js 15"]
+    end
+
+    subgraph Smart Contracts
+        SOL["programs/sourcerer<br/>Anchor (Solana)<br/>create_token / buy / sell / graduate"]
+        BSC["contracts/bsc<br/>Foundry (Solidity)<br/>SourcererFactory + SourcererToken"]
+    end
+
+    subgraph SDKs
+        SDK_SOL["packages/sdk<br/>Anchor TS Client"]
+        SDK_BSC["packages/sdk-evm<br/>viem Client"]
+    end
+
+    subgraph Indexer
+        IDX["apps/indexer<br/>Fastify + Crons"]
+        NEWS["Exa Search API<br/>memecoin news"]
+        GRAD["Graduator Cron<br/>auto-graduate + LP burn"]
+    end
+
+    subgraph Storage
+        DB[("packages/db<br/>Prisma / Postgres")]
+    end
+
+    WEB -->|"create / trade"| SDK_SOL
+    WEB -->|"create / trade"| SDK_BSC
+    SDK_SOL -->|"TX"| SOL
+    SDK_BSC -->|"TX"| BSC
+
+    IDX -->|"Helius webhook"| SOL
+    IDX -->|"Block poller"| BSC
+    IDX -->|"fetch headlines"| NEWS
+    IDX -->|"write"| DB
+    GRAD -->|"graduate + seed Raydium/PancakeSwap"| SOL
+    GRAD -->|"graduate"| BSC
+
+    WEB -->|"read tokens, trades"| DB
+```
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Web as Next.js Frontend
+    participant AI as AI (GPT-4o / Decart)
+    participant Chain as Solana / BSC
+
+    User->>Web: type idea or pick news headline
+    Web->>AI: generate concept (name, ticker, logo, lore)
+    AI-->>Web: JSON concept + images
+    User->>Web: review & click Deploy
+    Web->>Chain: create token + seed bonding curve
+    Chain-->>Web: token address
+
+    Note over User,Chain: Trading phase
+    User->>Web: buy / sell on bonding curve
+    Web->>Chain: trade TX (buy / sell)
+
+    Note over Chain: curve reaches 85 SOL/BNB
+    Note over Chain: auto-graduate → Raydium / PancakeSwap
+    Note over Chain: LP burned
+```
+
+```mermaid
+flowchart LR
+    subgraph News Flow
+        EXA["Exa Search API"] -->|"live headlines"| NEWS_PAGE["/news page"]
+        NEWS_PAGE -->|"meme this →"| CREATE["/create"]
+    end
+
+    subgraph Token Lifecycle
+        CREATE -->|"deploy"| CURVE["Bonding Curve<br/>buy / sell"]
+        CURVE -->|"≥ 85 native"| GRADUATE["Graduate"]
+        GRADUATE --> AMM["Raydium / PancakeSwap"]
+        GRADUATE -->|"burn"| BURN["LP Burned 🔥"]
+    end
+```
+
 ## Monorepo layout
 
 ```
 sourcerer/
 ├─ apps/
-│  ├─ web/                Next.js 14 app (home, /create, /token/[mint], /news)
+│  ├─ web/                Next.js 15 app (home, /create, /token/[mint], /news)
 │  └─ indexer/            Fastify + crons (Helius webhooks, BSC poller, news, graduator)
 ├─ packages/
 │  ├─ sdk/                TypeScript client for the Solana Anchor program
@@ -45,6 +126,9 @@ DECART_API_KEY=
 # OPENAI_API_KEY: GPT concepts when OpenRouter is not set (not used for images)
 OPENAI_API_KEY=sk-...
 
+# News (optional — Exa search for live meme coin headlines)
+EXA_API_KEY=
+
 # Solana
 NEXT_PUBLIC_SOLANA_RPC=https://api.devnet.solana.com
 NEXT_PUBLIC_SOLANA_CLUSTER=devnet
@@ -58,8 +142,7 @@ NEXT_PUBLIC_SOURCERER_BSC_FACTORY=0x...
 NEXT_PUBLIC_WALLETCONNECT_ID=...
 SOURCERER_BSC_PRIVATE_KEY=0x...         # only needed for graduator cron
 
-# News + storage (optional)
-NEWS_API_KEY=...
+# Storage + auth (optional)
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
 WEB3_STORAGE_TOKEN=...
@@ -101,8 +184,8 @@ Paste the deployed factory address into `NEXT_PUBLIC_SOURCERER_BSC_FACTORY` and 
 
 ## Demo script (60 seconds)
 
-1. *"An AI memecoin launcher that works on Solana **and** BNB Chain."*
-2. Show `/news`: "GPT-4o scores news headlines for memeability across 20 countries every 30 minutes."
+1. _"An AI memecoin launcher that works on Solana **and** BNB Chain."_
+2. Show `/news`: "Live meme coin headlines from Exa search — pick any story, meme it in seconds."
 3. Click a card → auto-fills `/create` with name, ticker, prompt.
 4. Click **AI Generate** → logo + 3 posters + concept appear.
 5. Flip chain switch to BNB, deploy, buy 0.1 BNB, show price chart ticking live.

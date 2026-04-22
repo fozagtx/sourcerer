@@ -1,50 +1,70 @@
 import { serverEnv } from "./env";
 
-/** Store PNG bytes in Supabase when configured; otherwise a data URL (fine for local dev). */
-export async function persistPngBytes(buf: Buffer, folder: "logos" | "posters"): Promise<string> {
+/** Store image bytes in Supabase when configured; otherwise a data URL (fine for local dev). */
+export async function persistImageBytes(
+  buf: Buffer,
+  folder: "logos" | "posters",
+  mime: "image/png" | "image/svg+xml" = "image/png",
+): Promise<string> {
+  const ext = mime === "image/svg+xml" ? "svg" : "png";
+  const b64Prefix =
+    mime === "image/svg+xml"
+      ? "data:image/svg+xml;base64,"
+      : "data:image/png;base64,";
+
   if (serverEnv.SUPABASE_URL && serverEnv.SUPABASE_SERVICE_ROLE_KEY) {
     try {
-      const key = `${folder}/${crypto.randomUUID()}.png`;
-      const upload = await fetch(`${serverEnv.SUPABASE_URL}/storage/v1/object/sourcerer/${key}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${serverEnv.SUPABASE_SERVICE_ROLE_KEY}`,
-          apikey: serverEnv.SUPABASE_SERVICE_ROLE_KEY,
-          "content-type": "image/png",
+      const key = `${folder}/${crypto.randomUUID()}.${ext}`;
+      const upload = await fetch(
+        `${serverEnv.SUPABASE_URL}/storage/v1/object/sourcerer/${key}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${serverEnv.SUPABASE_SERVICE_ROLE_KEY}`,
+            apikey: serverEnv.SUPABASE_SERVICE_ROLE_KEY,
+            "content-type": mime,
+          },
+          body: new Uint8Array(buf),
         },
-        body: new Uint8Array(buf),
-      });
+      );
       if (upload.ok) {
         return `${serverEnv.SUPABASE_URL}/storage/v1/object/public/sourcerer/${key}`;
       }
-      console.warn("[storage] supabase png upload failed", upload.status);
+      console.warn("[storage] supabase upload failed", upload.status);
     } catch (e) {
-      console.warn("[storage] supabase png upload error", e);
+      console.warn("[storage] supabase upload error", e);
     }
   }
-  return `data:image/png;base64,${Buffer.from(buf).toString("base64")}`;
+  return `${b64Prefix}${Buffer.from(buf).toString("base64")}`;
 }
 
 /**
  * Uploads a remote image URL to Supabase Storage and returns a durable public URL.
  * Falls back to returning the source URL unchanged if Supabase isn't configured.
  */
-export async function mirrorToSupabase(srcUrl: string, folder: "logos" | "posters"): Promise<string> {
-  if (!serverEnv.SUPABASE_URL || !serverEnv.SUPABASE_SERVICE_ROLE_KEY) return srcUrl;
+export async function mirrorToSupabase(
+  srcUrl: string,
+  folder: "logos" | "posters",
+): Promise<string> {
+  if (!serverEnv.SUPABASE_URL || !serverEnv.SUPABASE_SERVICE_ROLE_KEY)
+    return srcUrl;
   try {
     const res = await fetch(srcUrl);
     if (!res.ok) return srcUrl;
     const buf = Buffer.from(await res.arrayBuffer());
     const key = `${folder}/${crypto.randomUUID()}.png`;
-    const upload = await fetch(`${serverEnv.SUPABASE_URL}/storage/v1/object/sourcerer/${key}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${serverEnv.SUPABASE_SERVICE_ROLE_KEY}`,
-        apikey: serverEnv.SUPABASE_SERVICE_ROLE_KEY,
-        "content-type": "image/png",
+    const upload = await fetch(
+      `${serverEnv.SUPABASE_URL}/storage/v1/object/sourcerer/${key}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${serverEnv.SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: serverEnv.SUPABASE_SERVICE_ROLE_KEY,
+          "content-type": "image/png",
+        },
+        body: buf,
       },
-      body: buf,
-    });
+    );
     if (!upload.ok) return srcUrl;
     return `${serverEnv.SUPABASE_URL}/storage/v1/object/public/sourcerer/${key}`;
   } catch {
